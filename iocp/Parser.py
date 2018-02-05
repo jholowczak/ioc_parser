@@ -163,6 +163,7 @@ class Parser(object):
 		return False
 
 	def parse_page(self, fpath, data, page_num):
+                temp = []
 		for ind_type, ind_regex in self.patterns.items():
 			matches = ind_regex.findall(data)
 
@@ -182,7 +183,11 @@ class Parser(object):
 
 					self.dedup_store.add((ind_type, ind_match))
 
-				self.handler.print_match(fpath, page_num, ind_type, ind_match)
+				ret = self.handler.print_match(fpath, page_num, ind_type, ind_match)
+                                if ret:
+                                        temp.append(ret)
+                return temp
+
 
 	def parse_pdf_pypdf2(self, f, fpath):
 		try:
@@ -271,8 +276,9 @@ class Parser(object):
 					text += unicode(elem)
 
 			self.handler.print_header(fpath)
-			self.parse_page(fpath, text, 1)
+			ret = self.parse_page(fpath, text, 1)
 			self.handler.print_footer(fpath)
+                        return ret
 		except (KeyboardInterrupt, SystemExit):
 			raise
 
@@ -286,19 +292,19 @@ class Parser(object):
 				r = requests.get(path, headers=headers)
 				r.raise_for_status()
 				f = StringIO(r.content)
-				self.parser_func(f, path)
-				return
+				ret = self.parser_func(f, path)
+				return ret
 			elif os.path.isfile(path):
 				with open(path, 'rb') as f:
-					self.parser_func(f, path)
-				return
+					ret = self.parser_func(f, path)
+				return ret
 			elif os.path.isdir(path):
 				for walk_root, walk_dirs, walk_files in os.walk(path):
 					for walk_file in fnmatch.filter(walk_files, self.ext_filter):
 						fpath = os.path.join(walk_root, walk_file)
 						with open(fpath, 'rb') as f:
-							self.parser_func(f, fpath)
-				return
+							ret = self.parser_func(f, fpath)
+				return ret
 
 			e = 'File path is not a file, directory or URL: %s' % (path)
 			raise IOError(e)

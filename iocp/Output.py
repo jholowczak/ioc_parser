@@ -5,7 +5,7 @@ import sys
 import csv
 import json
 
-OUTPUT_FORMATS = ('csv', 'tsv', 'json', 'yara', 'netflow', )
+OUTPUT_FORMATS = ('csv', 'tsv', 'json', 'yara', 'netflow', 'code', )
 
 def getHandler(output_format):
 	output_format = output_format.lower()
@@ -116,3 +116,25 @@ class OutputHandler_netflow(OutputHandler):
 		}
 		if data["type"] == "IP":
 			print " or host %s " % data["match"]
+
+class OutputHandler_code(OutputHandler):
+	def print_match(self, fpath, page, name, match):
+		data = {
+			'path' : fpath,
+			'file' : os.path.basename(fpath),
+			'page' : page,
+			'type' : name,
+			'match': match
+		}
+
+		return data
+
+	def print_error(self, fpath, exception):
+		data = {
+			'path'      : fpath,
+			'file'      : os.path.basename(fpath),
+			'type'      : 'error',
+			'exception' : exception
+		}
+
+		return data
