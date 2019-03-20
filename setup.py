@@ -20,7 +20,7 @@ setup(
 		"License :: OSI Approved :: MIT License",
 	],
 	install_requires=[
-		"pdfminer",
+		"pdfminer.six",
 		"PyPDF2",
 		"requests",
 		"beautifulsoup4"
